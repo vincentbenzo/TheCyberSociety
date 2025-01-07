@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:alpine:latest  # Direct use of official image
+    image: nginx:alpine # Direct use of official image
     volumes:
       - ./hugo_build:/usr/share/nginx/html:ro
       - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro  # Mount config file instead of baking it in
@@ -51,7 +51,7 @@ services:
       - traefik.http.routers.thecybersociety-https.tls.domains[0].sans=thecybersociety.io
       #Define what port to reach to access the container/service
       - traefik.http.routers.thecybersociety-https.service=thecybersociety
-      - traefik.http.services.thecybersociety.loadbalancer.server.port=2368
+      - traefik.http.services.thecybersociety.loadbalancer.server.port=80
       #Watchtower watching updates
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
