@@ -37,7 +37,3 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Trigger Watchtower Update
-        run: |
-          curl -H "Authorization: Bearer ${{ secrets.WATCHTOWER_HTTP_API_TOKEN }}" ${{ secrets.WATCHTOWER_URL }}/v1/update
