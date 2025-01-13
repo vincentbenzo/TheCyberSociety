@@ -1,5 +1,16 @@
+# Hugo generated files
 public/
 resources/_gen/
+.hugo_build.lock
+
+# OS files
 .DS_Store
-node_modules/
+Thumbs.db
+
+# Environment variables and secrets
 .env
+*.env
+deploy_token
+
+# Cache directories
+~/hugo_cache/
