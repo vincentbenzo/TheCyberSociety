@@ -5,54 +5,27 @@ networks:
     external: true
 
 services:
-  hugo:
-    build:
-      context: .
-      dockerfile: docker/hugo/Dockerfile-hugo
-    volumes:
-      - ./hugo_build:/app/public
-    healthcheck:
-      test: ["CMD", "stat", "/app/public/index.html"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine # Direct use of official image
-    volumes:
-      - ./hugo_build:/usr/share/nginx/html:ro
-      - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro  # Mount config file instead of baking it in
-    depends_on:
-      hugo:
-        condition: service_healthy
+  web:
+    image: ghcr.io/vincentbenzo/thecybersociety:latest
     labels:
-    #connect the container to traefik and define which network to use
       - traefik.enable=true
       - traefik.docker.network=traefik-public-net
-      #enabling http
       - traefik.http.routers.thecybersociety-http.rule=Host(`www.thecybersociety.io`) || Host(`thecybersociety.io`)
       - traefik.http.routers.thecybersociety-http.entrypoints=http
-      #Define and use of middelware to force http to https
       - traefik.http.middlewares.httptohttps.redirectscheme.scheme=https
       - traefik.http.middlewares.httptohttps.redirectscheme.permanent=true
       - traefik.http.routers.thecybersociety-http.middlewares=httptohttps
-      #enabling https
       - traefik.http.routers.thecybersociety-https.rule=Host(`www.thecybersociety.io`) || Host(`thecybersociety.io`)
       - traefik.http.routers.thecybersociety-https.entrypoints=https
-      #Define and use of middleware redirecting www to non-www
       - traefik.http.middlewares.www-to-non-www.redirectregex.regex=^https?://www.thecybersociety.io/(.*)
       - traefik.http.middlewares.www-to-non-www.redirectregex.replacement=https://thecybersociety.io/$${1}
       - traefik.http.middlewares.www-to-non-www.redirectregex.permanent=true
       - traefik.http.routers.thecybersociety-https.middlewares=www-to-non-www
-      #Certificate resolver and certificates names to use for tls
       - traefik.http.routers.thecybersociety-https.tls.certresolver=dnschallengecloudflare
       - traefik.http.routers.thecybersociety-https.tls.domains[0].main=*.thecybersociety.io
       - traefik.http.routers.thecybersociety-https.tls.domains[0].sans=thecybersociety.io
-      #Define what port to reach to access the container/service
       - traefik.http.routers.thecybersociety-https.service=thecybersociety
       - traefik.http.services.thecybersociety.loadbalancer.server.port=80
-      #Watchtower watching updates
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - traefik-public-net
