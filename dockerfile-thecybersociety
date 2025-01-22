@@ -13,10 +13,12 @@ COPY . /src
 # Debug: List contents
 RUN ls -la /src && \
     echo "Theme directory contents:" && \
-    ls -la /src/themes/ || echo "No themes directory"
+    ls -la /src/themes/ || echo "No themes directory" && \
+    echo "Config directory contents:" && \
+    ls -la /src/config/hugo/
 
-# Build site with debug output
-RUN hugo --minify --enableGitInfo --logLevel debug
+# Build site with config path specified
+RUN hugo --minify --enableGitInfo --logLevel debug --config /src/config/hugo/config.yml
 
 #####################################################################
 #                            Final Stage                            #
