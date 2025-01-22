@@ -1,37 +1,32 @@
-# Build stage
-FROM hugomods/hugo:exts-non-root as builder
+#####################################################################
+#                            Build Stage                            #
+#####################################################################
+FROM hugomods/hugo:exts as builder
 
-WORKDIR /src
+# Base URL
+ARG HUGO_BASEURL=https://thecybersociety.io
+ENV HUGO_BASEURL=${HUGO_BASEURL}
 
-# Copy the entire project
-COPY . .
+# Copy source
+COPY . /src
 
-# Debug: List contents and theme
-RUN ls -la && \
+# Debug: List contents
+RUN ls -la /src && \
     echo "Theme directory contents:" && \
-    ls -la themes/ || echo "No themes directory"
+    ls -la /src/themes/ || echo "No themes directory"
 
-# Verify hugo installation and version
-RUN hugo version
+# Build site with verbose output for debugging
+RUN hugo --minify --enableGitInfo --verbose
 
-# Initialize theme if not present
-RUN if [ ! -d "themes/PaperMod" ]; then \
-    git init && \
-    git submodule add https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod; \
-    fi
+#####################################################################
+#                            Final Stage                            #
+#####################################################################
+FROM hugomods/hugo:nginx
 
-# Debug: List contents after theme initialization
-RUN ls -la && \
-    echo "Theme directory contents after init:" && \
-    ls -la themes/
+# Copy the generated files
+COPY --from=builder /src/public /site
 
-# Try building with extra verbose output
-RUN hugo --minify --verbose --debug
-
-# Production stage
-FROM nginx:alpine
-
-COPY --from=builder /src/public /usr/share/nginx/html
+# Copy custom nginx configuration if needed
 COPY config/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Add labels for container metadata
