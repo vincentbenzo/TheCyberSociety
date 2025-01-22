@@ -13,6 +13,12 @@ jobs:
     outputs:
       images-updated: ${{ steps.check-updates.outputs.images-updated }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Check for image updates
         id: check-updates
         run: |
@@ -45,8 +51,8 @@ jobs:
           mv /tmp/current_exts_digest .github/digests/exts_digest
           mv /tmp/current_nginx_digest .github/digests/nginx_digest
           
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git add .github/digests/*
           git commit -m "Update image digests [skip ci]"
