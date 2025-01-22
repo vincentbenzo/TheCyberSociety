@@ -1,8 +1,0 @@
-FROM hugomods/hugo:latest
-
-WORKDIR /app
-COPY . .
-RUN hugo --minify
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD stat /app/public/index.html || exit 1
