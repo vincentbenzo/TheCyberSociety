@@ -3,7 +3,12 @@ FROM hugomods/hugo:exts-non-root as builder
 
 WORKDIR /src
 COPY . .
-RUN hugo --minify
+# Initialize and update the theme submodule
+RUN git init && \
+    git submodule add https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod && \
+    git submodule update --init --recursive && \
+    hugo --minify
+
 
 # Production stage
 FROM nginx:alpine
