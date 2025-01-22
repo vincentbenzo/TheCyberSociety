@@ -1,34 +1,81 @@
 name: Build and Deploy
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
+  schedule:
+    # Check for updates every day at 00:00 UTC
+    - cron: '0 0 * * *'
+  
 jobs:
+  check-docker-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      images-updated: ${{ steps.check-updates.outputs.images-updated }}
+    steps:
+      - name: Check for image updates
+        id: check-updates
+        run: |
+          # Pull the latest images and get their digests
+          EXTS_DIGEST=$(docker pull hugomods/hugo:exts | grep -i digest | awk '{print $2}')
+          NGINX_DIGEST=$(docker pull hugomods/hugo:nginx | grep -i digest | awk '{print $2}')
+          
+          # Create marker files with current digests
+          echo "$EXTS_DIGEST" > /tmp/current_exts_digest
+          echo "$NGINX_DIGEST" > /tmp/current_nginx_digest
+          
+          # Compare with previous digests if they exist
+          if [ -f .github/digests/exts_digest ] && [ -f .github/digests/nginx_digest ]; then
+            OLD_EXTS_DIGEST=$(cat .github/digests/exts_digest)
+            OLD_NGINX_DIGEST=$(cat .github/digests/nginx_digest)
+            
+            if [ "$EXTS_DIGEST" != "$OLD_EXTS_DIGEST" ] || [ "$NGINX_DIGEST" != "$OLD_NGINX_DIGEST" ]; then
+              echo "images-updated=true" >> $GITHUB_OUTPUT
+            else
+              echo "images-updated=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "images-updated=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update digest files
+        if: steps.check-updates.outputs.images-updated == 'true'
+        run: |
+          mkdir -p .github/digests
+          mv /tmp/current_exts_digest .github/digests/exts_digest
+          mv /tmp/current_nginx_digest .github/digests/nginx_digest
+          
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          
+          git add .github/digests/*
+          git commit -m "Update image digests [skip ci]"
+          git push
+
   build-and-push:
+    needs: check-docker-updates
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.check-docker-updates.outputs.images-updated == 'true' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
+          
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
+        
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
