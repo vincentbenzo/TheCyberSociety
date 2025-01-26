@@ -36,7 +36,7 @@ The architecture is divided into four main parts:
 
 # The deployements (aka hands on)
 
-With the architecture defined, it’s time to dive into the deployment process. Here’s a step-by-step guide to how I set up the blog on my homelab. You can find everything in my TheCyberSociety github repo.  
+With the architecture defined, it’s time to dive into the deployment process. Here’s a step-by-step guide to how I set up the blog on my homelab. You can find everything in my [TheCyberSociety github repo](https://github.com/vincentbenzo/TheCyberSociety).  
 
 ## 1. Setting Up the Hugo Site
    You first need to create a hugo site locally, then add the theme you want and to finish upload this site on Github.
