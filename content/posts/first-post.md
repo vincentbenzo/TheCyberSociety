@@ -29,9 +29,9 @@ The solution I developed is a static site powered by Hugo, hosted and versioned 
 
 The architecture is divided into four main parts:
 
-* Site TechnologyThe site is built with Hugo, an open-source static site generator written in Go. It allows me to host and build the site using GitHub, write articles in Markdown, and maintain a flat file architecture.
-* CI/CD SetupContinuous Integration and Continuous Deployment (CI/CD) are handled by GitHub Actions, which automate the site’s build process and publish the container to GitHub’s container repository.
-* HostingThe hosting is managed on my homelab, using Docker Compose to deploy the site. WatchTower ensures the container is updated automatically whenever there’s a new release.
-* Proxy SetupTraefik manages the reverse proxy and SSL certificates, while Cloudflare provides an additional layer of security and acts as a proxy for my public-facing site. 
+* **Site Technology**, The site is built with Hugo, an open-source static site generator written in Go. It allows me to host and build the site using GitHub, write articles in Markdown, and maintain a flat file architecture.
+* **CI/CD Setup**, Continuous Integration and Continuous Deployment (CI/CD) are handled by GitHub Actions, which automate the site’s build process and publish the container to GitHub’s container repository.
+* **Hosting**, The hosting is managed on my homelab, using Docker Compose to deploy the site. WatchTower ensures the container is updated automatically whenever there’s a new release.
+* **Proxy Setup**, Traefik manages the reverse proxy and SSL certificates, while Cloudflare provides an additional layer of security and acts as a proxy for my public-facing site. 
 
 # The deployements (aka hands on)
